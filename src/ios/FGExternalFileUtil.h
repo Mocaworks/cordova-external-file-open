@@ -24,6 +24,7 @@
 #define KEY_HEIGHT_VIEW     @"viewHeight"
 #define KEY_POSX_VIEW       @"viewPosX"
 #define KEY_POSY_VIEW       @"viewPosY"
+#define KEY_TITLE           @"name"
 
 @interface FGExternalFileUtil : CDVPlugin <UIDocumentInteractionControllerDelegate> {
     NSString *localFile;

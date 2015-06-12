@@ -30,12 +30,13 @@
     CDVPluginResult* pluginResult = nil;
     
     NSString *path = [command.arguments objectAtIndex:0]; 
-    NSString *uti = [command.arguments objectAtIndex:1]; 
+    NSString *uti = [command.arguments objectAtIndex:1];
+    NSURL *url = [NSURL URLWithString:path];
     
     NSLog(@"path %@, uti:%@", path, uti);
     
     NSFileManager *fileManager = [NSFileManager defaultManager];
-    BOOL fileExists = [fileManager fileExistsAtPath:path];
+    BOOL fileExists = [fileManager fileExistsAtPath:[url path]];
     
     if(!fileExists){
         NSArray *parts = [path componentsSeparatedByString:@"/"];
@@ -51,23 +52,17 @@
         localFile = [documentsDirectory stringByAppendingPathComponent:previewDocumentFileName];
         [fileRemote writeToFile:localFile atomically:YES];
     } else {
-        localFile = path;
+        localFile = [url path];
     }
     //NSLog(@"Resource file '%@' has been written to the Documents directory from online", previewDocumentFileName);
-    
-    
     // Get file again from Documents directory
     NSURL *fileURL = [NSURL fileURLWithPath:localFile];
-    
-	self.docController = [UIDocumentInteractionController interactionControllerWithURL:fileURL];
-	self.docController.delegate = self;
-	self.docController.UTI = uti;
     
     CDVViewController* cont = (CDVViewController*)[ super viewController ];
     CGRect rect = CGRectZero;
 	if([command.arguments count] > 2) {
 		NSMutableDictionary* options = [command.arguments objectAtIndex:2];
-	    if(options == nil || [options count] == 0) {
+	    if(options == nil || [options count] < 4) {
 	        rect = cont.view.frame;
 	    } else {
 	        float width = [[options objectForKey:KEY_WIDTH_VIEW] floatValue];
@@ -75,10 +70,27 @@
 	        float posX = [[options objectForKey:KEY_POSX_VIEW] floatValue];
 	        float posY = [[options objectForKey:KEY_POSY_VIEW] floatValue];
 	        rect = CGRectMake(posX, posY, width, height);
+            
+            if([options objectForKey:KEY_TITLE] != nil) {
+                NSString *fileName = [options objectForKey:KEY_TITLE];
+                NSString *titlePath = [NSTemporaryDirectory() stringByAppendingString:fileName];
+                //NSString* titlePath = [[[fileURL URLByDeletingLastPathComponent] URLByAppendingPathComponent:fileName] path];
+                NSError *error = nil;
+                [[NSFileManager defaultManager] linkItemAtPath:localFile toPath:titlePath error:&error];
+                //self.docController.name = [options objectForKey:KEY_TITLE];
+                fileURL = [NSURL fileURLWithPath:titlePath];
+                NSLog(@"Renamed file to  %@", self.docController.name);
+            }
 	    }
 	} else {
 		rect = cont.view.frame;
 	}
+    
+	self.docController = [UIDocumentInteractionController interactionControllerWithURL:fileURL];
+    
+	self.docController.delegate = self;
+	self.docController.UTI = uti;
+    
 	
     if([self.docController presentOpenInMenuFromRect:rect inView:cont.view animated:YES]) {
         pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];	
@@ -104,6 +116,7 @@
     NSLog(@"didEndSendingToApplication: %@", application);
     
     //[self cleanupTempFile:controller];
+    
 }
 
 - (void) cleanupTempFile: (UIDocumentInteractionController *) controller
