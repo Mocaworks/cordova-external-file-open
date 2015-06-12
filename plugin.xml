@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
-	id="com.fgomiero.cordova.externafileutil" version="0.0.4">
+	id="com.fgomiero.cordova.externafileutil" version="0.0.5">
 	<name>ExternalFileUtil</name>
 	<description>FGomiero open file with external app Plugin</description>
 	<license>Apache 2.0</license>
@@ -8,11 +8,11 @@
 	<js-module src="www/ExternalFileUtil.js" name="ExternalFileUtil">
 		<clobbers target="ExternalFileUtil" />
 	</js-module>
-	
+
     <engines>
         <engine name="cordova" version=">=3.0.0" />
     </engines>
-	
+
 	<!-- ios -->
 	<platform name="ios">
 		<config-file target="config.xml" parent="/*">
@@ -20,7 +20,7 @@
 				<param name="ios-package" value="FGExternalFileUtil"/>
 			</feature>
 		</config-file>
-    
+
 		<header-file src="src/ios/FGExternalFileUtil.h" />
 		<source-file src="src/ios/FGExternalFileUtil.m" />
 	</platform>
@@ -32,9 +32,13 @@
 				<param name="android-package" value="com.fgomiero.cordova.plugin.ExternalFileUtil"/>
 			</feature>
 		</config-file>
-		
+		<config-file target="AndroidManifest.xml" parent="/*">
+            <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+			<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+        </config-file>
+
 		<source-file src="src/android/com/fgomiero/cordova/plugin/ExternalFileUtil.java" target-dir="src/com/fgomiero/cordova/plugin" />
-		
+
 	</platform>
-	
+
 </plugin>
